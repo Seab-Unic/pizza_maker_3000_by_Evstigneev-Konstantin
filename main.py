@@ -31,7 +31,7 @@ def decorator_check(func):
 def info():
     name = input("Введите ФИО ")
     if not check_fio(name):
-        print("Ошибка: некорректный формат фио")
+        print("Ошибка, некорректный формат фио")
         return None
     email = input("Введите email ")
     if not check_email(email):
@@ -56,8 +56,15 @@ def agecheck(age):
         print("Напитки:")
         print("4. Сок(злой мультифрукт) - 100руб")
         print("5. Газировка - 120руб")
-        return {'1': ('Пеперони', 400), '2': ('Сырная', 350), '3': ('Цезарь', 390),
-                '4': ('Сок', 100), '5': ('Газировка', 120)}
+        print("6. Хочу создать пиццу")
+        return {
+            "1": ("Пеперони", 400),
+            "2": ("Сырная", 350),
+            "3": ("Цезарь", 390),
+            "4": ("Сок", 100),
+            "5": ("Газировка", 120),
+            "6": ("Хочу создать пиццу", 0)
+        }
     else:
         print("Пиццы:")
         print("1. Пеперони - 400руб")
@@ -69,25 +76,46 @@ def agecheck(age):
         print("Напитки:")
         print("7. Сок(злой мультифрукт) - 100руб")
         print("8. Газировка - 120руб")
-        return {'1': ('Пеперони', 400), '2': ('Пеперони большая', 500), '3': ('Сырная', 350),
-                '4': ('Сырная большая', 450), '5': ('Цезарь', 390), '6': ('Цезарь большой', 490),
-                '7': ('Сок (злой мультифрукт)', 100), '8': ('Газировка', 120)}
+        print("9. Хочу создать пиццу")
+        return {
+            "1": ("Пеперони", 400),
+            "2": ("Пеперони большая", 500),
+            "3": ("Сырная", 350),
+            "4": ("Сырная большая", 450),
+            "5": ("Цезарь", 390),
+            "6": ("Цезарь большой", 490),
+            "7": ("Сок (злой мультифрукт)", 100),
+            "8": ("Газировка", 120),
+            "9": ("Хочу создать пиццу", 0)
+        }
 
 def order(menu):
     total = 0
     order_items = []
     while True:
         choice = input("Выберите номер (или 'стоп' для остановки) ")
-        if choice.lower() == 'стоп':
+        if choice.lower() == "стоп":
             break
         if choice in menu:
             item, price = menu[choice]
-            print(f"Выбрали: {item} за {price}руб")
-            yn = input("Добавить? (да/нет) ")
-            if yn.lower() == 'да':
-                order_items.append((item, price))
-                total += price
-                print("Добавлено")
+            if item == "Хочу создать пиццу":
+                print("Вы выбрали создание кастомной пиццы.")
+                ingredients = input("Введите ингредиенты через запятую ")
+                cp_name = f"Кастомная пицца: {ingredients}"
+                cp_price = 450
+                print(f"Выбрали: {cp_name} за {cp_price}руб")
+                yn = input("Добавить? (да/нет) ")
+                if yn.lower() == "да":
+                    order_items.append((cp_name, cp_price))
+                    total += cp_price
+                    print("Добавлено")
+            else:
+                print(f"Выбрали: {item} за {price}руб")
+                yn = input("Добавить? (да/нет) ")
+                if yn.lower() == "да":
+                    order_items.append((item, price))
+                    total += price
+                    print("Добавлено")
         else:
             print("Нет такого")
     if order_items:
@@ -96,7 +124,7 @@ def order(menu):
             print(f"{item} - {price}руб")
         print(f"Всего: {total}руб")
         confirm = input("Подтвердить? (да/нет) ")
-        if confirm.lower() == 'да':
+        if confirm.lower() == "да":
             print("Заказ принят")
             check_output(order_items)
             return True
@@ -124,4 +152,3 @@ def main():
     order(menu)
 
 main()
-
