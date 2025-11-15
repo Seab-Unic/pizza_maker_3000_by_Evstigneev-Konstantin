@@ -89,8 +89,7 @@ def agecheck(age):
             "8": ("Газировка", 120),
             "9": ("Хочу создать пиццу", 0)
         }
-
-def order(menu):
+        def order(menu):
     total = 0
     order_items = []
     while True:
@@ -153,3 +152,4 @@ def main():
     order(menu)
 
 main()
+
