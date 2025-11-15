@@ -1,5 +1,5 @@
 import re
-
+from datetime import datetime
 def check_fio(fio):
     pattern = r"^[А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+$"
     return bool(re.fullmatch(pattern, fio.strip()))
@@ -37,18 +37,19 @@ def info():
     if not check_email(email):
         print("Ошибка")
         return None
-    phone = input("введите номер телефона")
+    phone = input("введите номер телефона ")
     print(f"Привет, {name}")
     try:
-        age = int(input("Введите ваш возраст "))
-        return age
+        age = input("Введите вашу дату рождения (дд.мм.гггг): ")
+        age2 = datetime.strptime(age, "%d.%m.%Y")
+        return age2.year
     except ValueError:
-        print("Ошибка в возрасте")
+        print("Ошибка в формате даты")
         return None
 
 @decorator_menu
 def agecheck(age):
-    if age < 18:
+    if age < 2007 :
         print("Пиццы:")
         print("1. Пеперони - 400руб")
         print("2. Сырная - 350руб")
@@ -93,7 +94,7 @@ def order(menu):
     total = 0
     order_items = []
     while True:
-        choice = input("Выберите номер (или 'стоп' для остановки) ")
+        choice = input("Выберите номер (или стоп для остановки) ")
         if choice.lower() == "стоп":
             break
         if choice in menu:
