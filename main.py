@@ -1,5 +1,12 @@
 import re
 from datetime import datetime
+import asyncio
+import time
+
+async def fun1(x):
+    print("ждем ответа от сервера")
+    await asyncio.sleep(10)
+
 def check_fio(fio):
     pattern = r"^[А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+$"
     return bool(re.fullmatch(pattern, fio.strip()))
@@ -40,7 +47,7 @@ def info():
     phone = input("введите номер телефона ")
     print(f"Привет, {name}")
     try:
-        age = input("Введите вашу дату рождения (дд.мм.гггг): ")
+        age = input("Введите вашу дату рождения (дд.мм.гггг) ")
         age2 = datetime.strptime(age, "%d.%m.%Y")
         return age2.year
     except ValueError:
@@ -49,7 +56,7 @@ def info():
 
 @decorator_menu
 def agecheck(age):
-    if age < 2007 :
+    if age > 2007:
         print("Пиццы:")
         print("1. Пеперони - 400руб")
         print("2. Сырная - 350руб")
@@ -89,7 +96,14 @@ def agecheck(age):
             "8": ("Газировка", 120),
             "9": ("Хочу создать пиццу", 0)
         }
-        def order(menu):
+
+def order(menu):
+    ingridients_check = {
+        "1": "Пепперони", "2": "Салями", "3": "Ветчина", "4": "Бекон", "5": "Куриное филе",
+        "6": "Моцарелла", "7": "Чеддер", "8": "Горгонзола", "9": "Пармезан", "10": "Фета",
+        "11": "Томатный соус", "12": "Сырный соус", "13": "Барбекю", "14": "Песто", "15": "Сметанный соус",
+        "16": "Шампиньоны", "17": "Лук", "18": "Сладкий перец", "19": "Оливки", "20": "Помидоры"
+    }
     total = 0
     order_items = []
     while True:
@@ -100,8 +114,17 @@ def agecheck(age):
             item, price = menu[choice]
             if item == "Хочу создать пиццу":
                 print("Вы выбрали создание кастомной пиццы.")
-                ingredients = input("Введите ингредиенты через запятую ")
-                cp_name = f"Кастомная пицца: {ingredients}"
+                print("Список ингредиентов:")
+                for key, value in ingridients_check.items():
+                    print(f"{key}: {value}")
+                ingredients_input = input("Введите номера ингредиентов через запятую: ")
+                ingredients_list = ingredients_input.split(',')
+                try:
+                    ingredients = [ingridients_check[num.strip()] for num in ingredients_list]
+                except KeyError:
+                    print("надо ввести цифру")
+                    return
+                cp_name = f"Кастомная пицца: {', '.join(ingredients)}"
                 cp_price = 450
                 print(f"Выбрали: {cp_name} за {cp_price}руб")
                 yn = input("Добавить? (да/нет) ")
@@ -109,6 +132,8 @@ def agecheck(age):
                     order_items.append((cp_name, cp_price))
                     total += cp_price
                     print("Добавлено")
+                else:
+                    print("Отменено")
             else:
                 print(f"Выбрали: {item} за {price}руб")
                 yn = input("Добавить? (да/нет) ")
@@ -144,12 +169,14 @@ def check_output(order_items):
     print(f"Всего: {total}руб")
     return True
 
-def main():
+async def main():
     age = info()
     if age is None:
         return
     menu = agecheck(age)
+    await fun1("something because it`s need to be")
     order(menu)
 
-main()
+asyncio.run(main())
+
 
