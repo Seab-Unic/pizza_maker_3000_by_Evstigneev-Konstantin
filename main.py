@@ -3,6 +3,28 @@ from datetime import datetime
 import asyncio
 import time
 
+def update_ingredients(file_path, ingredients_used):
+    with open(file_path, 'r', encoding='utf-8') as file:
+        lines = file.readlines()
+
+    updated_lines = []
+    for line in lines:
+        if '-' in line:
+            name, *rest = line.split('-', 1)
+            name = name.strip()
+            if name in ingredients_used:
+                try:
+                    value = int(rest[0].strip()) - 1
+                    updated_lines.append(f"{name} - {value}\n")
+                    continue
+                except (ValueError, IndexError):
+                    pass
+        updated_lines.append(line)
+
+    with open(file_path, 'w', encoding='utf-8') as file:
+        file.writelines(updated_lines)
+
+
 async def fun1(x):
     print("ждем ответа от сервера")
     await asyncio.sleep(10)
@@ -106,6 +128,8 @@ def order(menu):
     }
     total = 0
     order_items = []
+    ingredients_used = []
+
     while True:
         choice = input("Выберите номер (или стоп для остановки) ")
         if choice.lower() == "стоп":
@@ -121,6 +145,7 @@ def order(menu):
                 ingredients_list = ingredients_input.split(',')
                 try:
                     ingredients = [ingridients_check[num.strip()] for num in ingredients_list]
+                    ingredients_used.extend(ingredients)
                 except KeyError:
                     print("надо ввести цифру")
                     return
@@ -143,6 +168,7 @@ def order(menu):
                     print("Добавлено")
         else:
             print("Нет такого")
+
     if order_items:
         print("\nВаш заказ:")
         for item, price in order_items:
@@ -152,6 +178,8 @@ def order(menu):
         if confirm.lower() == "да":
             print("Заказ принят")
             check_output(order_items)
+            if ingredients_used:
+                update_ingredients("C:\\Users\\Seab\\PycharmProjects\\PythonProject1\\baze.txt", ingredients_used)
             return True
         else:
             print("Заказ отменен")
@@ -178,5 +206,8 @@ async def main():
     order(menu)
 
 asyncio.run(main())
+
+
+
 
 
