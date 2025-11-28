@@ -1,12 +1,10 @@
 import re
 from datetime import datetime
 import asyncio
-import time
 
 def update_ingredients(file_path, ingredients_used):
     with open(file_path, 'r', encoding='utf-8') as file:
         lines = file.readlines()
-
     updated_lines = []
     for line in lines:
         if '-' in line:
@@ -20,13 +18,11 @@ def update_ingredients(file_path, ingredients_used):
                 except (ValueError, IndexError):
                     pass
         updated_lines.append(line)
-
     with open(file_path, 'w', encoding='utf-8') as file:
         file.writelines(updated_lines)
 
-
 async def fun1(x):
-    print("ждем ответа от сервера")
+    print("Ждём ответа от сервера")
     await asyncio.sleep(10)
 
 def check_fio(fio):
@@ -34,12 +30,12 @@ def check_fio(fio):
     return bool(re.fullmatch(pattern, fio.strip()))
 
 def check_email(email):
-    pattern = r"@"
-    return bool(re.search(pattern, email.strip()))
+    pattern = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+    return bool(re.fullmatch(pattern, email.strip()))
 
 def check_phone(phone):
-    pattern = r"+7"
-    return bool(re.search(pattern, phone.strip()))
+    pattern = r"^\+\d{11,}$"
+    return bool(re.fullmatch(pattern, phone.strip()))
 
 def decorator_menu(func):
     def wrapper(age):
@@ -57,23 +53,72 @@ def decorator_check(func):
         return result
     return wrapper
 
-def info():
-    name = input("Введите ФИО ")
-    if not check_fio(name):
-        print("Ошибка, некорректный формат фио")
-        return None
-    email = input("Введите email ")
-    if not check_email(email):
-        print("Ошибка")
-        return None
-    phone = input("введите номер телефона ")
-    print(f"Привет, {name}")
+def save_user_data(name, email, phone, birth_date):
+    with open(r"C:\Users\Seab\PycharmProjects\PythonProject1\list_users.txt", "a", encoding="utf-8") as file:
+        file.write(f"{name} - {email} - {phone} - {birth_date}\n")
+
+def check_user_exists(email):
     try:
-        age = input("Введите вашу дату рождения (дд.мм.гггг) ")
-        age2 = datetime.strptime(age, "%d.%m.%Y")
-        return age2.year
-    except ValueError:
-        print("Ошибка в формате даты")
+        with open(r"C:\Users\Seab\PycharmProjects\PythonProject1\list_users.txt", "r", encoding="utf-8") as file:
+            for line in file:
+                if email in line:
+                    return True
+    except FileNotFoundError:
+        pass
+    return False
+
+def login():
+    email = input("Введите email для входа: ")
+    if not check_email(email):
+        print("Ошибка, некорректный формат email")
+        return None
+    if not check_user_exists(email):
+        print("Пользователь с таким email не найден")
+        return None
+    print("Вход выполнен успешно")
+    return email
+
+def info():
+    print("1. Вход")
+    print("2. Регистрация")
+    choice = input("Выберите действие (1 или 2): ")
+    if choice == "1":
+        email = login()
+        if email is None:
+            return None
+        try:
+            with open(r"C:\Users\Seab\PycharmProjects\PythonProject1\list_users.txt", "r", encoding="utf-8") as file:
+                for line in file:
+                    if email in line:
+                        birth_date = line.split("-")[3].strip()
+                        age = datetime.strptime(birth_date, "%d.%m.%Y").year
+                        return age
+        except FileNotFoundError:
+            print("Ошибка при чтении данных пользователя")
+            return None
+    elif choice == "2":
+        name = input("Введите ФИО: ")
+        if not check_fio(name):
+            print("Ошибка, некорректный формат ФИО")
+            return None
+        email = input("Введите email: ")
+        if not check_email(email):
+            print("Ошибка, некорректный формат email")
+            return None
+        phone = input("Введите номер телефона: ")
+        if not check_phone(phone):
+            print("Ошибка, некорректный формат телефона")
+            return None
+        birth_date = input("Введите вашу дату рождения (дд.мм.гггг): ")
+        try:
+            age = datetime.strptime(birth_date, "%d.%m.%Y").year
+            save_user_data(name, email, phone, birth_date)
+            return age
+        except ValueError:
+            print("Ошибка в формате даты")
+            return None
+    else:
+        print("Некорректный выбор")
         return None
 
 @decorator_menu
@@ -129,9 +174,8 @@ def order(menu):
     total = 0
     order_items = []
     ingredients_used = []
-
     while True:
-        choice = input("Выберите номер (или стоп для остановки) ")
+        choice = input("Выберите номер (или стоп для остановки): ")
         if choice.lower() == "стоп":
             break
         if choice in menu:
@@ -147,12 +191,12 @@ def order(menu):
                     ingredients = [ingridients_check[num.strip()] for num in ingredients_list]
                     ingredients_used.extend(ingredients)
                 except KeyError:
-                    print("надо ввести цифру")
+                    print("Нужно ввести цифру")
                     return
                 cp_name = f"Кастомная пицца: {', '.join(ingredients)}"
                 cp_price = 450
                 print(f"Выбрали: {cp_name} за {cp_price}руб")
-                yn = input("Добавить? (да/нет) ")
+                yn = input("Добавить? (да/нет): ")
                 if yn.lower() == "да":
                     order_items.append((cp_name, cp_price))
                     total += cp_price
@@ -161,20 +205,19 @@ def order(menu):
                     print("Отменено")
             else:
                 print(f"Выбрали: {item} за {price}руб")
-                yn = input("Добавить? (да/нет) ")
+                yn = input("Добавить? (да/нет): ")
                 if yn.lower() == "да":
                     order_items.append((item, price))
                     total += price
                     print("Добавлено")
         else:
             print("Нет такого")
-
     if order_items:
         print("\nВаш заказ:")
         for item, price in order_items:
             print(f"{item} - {price}руб")
         print(f"Всего: {total}руб")
-        confirm = input("Подтвердить? (да/нет) ")
+        confirm = input("Подтвердить? (да/нет): ")
         if confirm.lower() == "да":
             print("Заказ принят")
             check_output(order_items)
@@ -182,7 +225,7 @@ def order(menu):
                 update_ingredients("C:\\Users\\Seab\\PycharmProjects\\PythonProject1\\baze.txt", ingredients_used)
             return True
         else:
-            print("Заказ отменен")
+            print("Заказ отменён")
             return False
     else:
         print("Ничего не заказано")
@@ -202,10 +245,11 @@ async def main():
     if age is None:
         return
     menu = agecheck(age)
-    await fun1("something because it`s need to be")
+    await fun1("something because it's needed")
     order(menu)
 
 asyncio.run(main())
+
 
 
 
