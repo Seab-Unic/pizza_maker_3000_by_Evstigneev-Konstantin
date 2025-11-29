@@ -53,16 +53,20 @@ def decorator_check(func):
         return result
     return wrapper
 
-def save_user_data(name, email, phone, birth_date):
+def save_user_data(name, email, phone, birth_date, password):
     with open(r"C:\Users\Seab\PycharmProjects\PythonProject1\list_users.txt", "a", encoding="utf-8") as file:
-        file.write(f"{name} - {email} - {phone} - {birth_date}\n")
+        file.write(f"{name} - {email} - {phone} - {birth_date} - {password}\n")
 
-def check_user_exists(email):
+def check_user_exists(email, password=None):
     try:
         with open(r"C:\Users\Seab\PycharmProjects\PythonProject1\list_users.txt", "r", encoding="utf-8") as file:
             for line in file:
-                if email in line:
-                    return True
+                parts = line.strip().split(" - ")
+                if len(parts) >= 2 and email == parts[1]:
+                    if password is not None and len(parts) >= 5 and password == parts[4]:
+                        return True
+                    elif password is None:
+                        return True
     except FileNotFoundError:
         pass
     return False
@@ -74,6 +78,10 @@ def login():
         return None
     if not check_user_exists(email):
         print("Пользователь с таким email не найден")
+        return None
+    password = input("Введите пароль: ")
+    if not check_user_exists(email, password):
+        print("Неверный пароль")
         return None
     print("Вход выполнен успешно")
     return email
@@ -91,7 +99,7 @@ def info():
                 for line in file:
                     if email in line:
                         birth_date = line.split("-")[3].strip()
-                        age = datetime.strptime(birth_date, "%d.%m.%Y").year
+                        age = datetime.now().year - datetime.strptime(birth_date, "%d.%m.%Y").year
                         return age
         except FileNotFoundError:
             print("Ошибка при чтении данных пользователя")
@@ -111,12 +119,13 @@ def info():
             return None
         birth_date = input("Введите вашу дату рождения (дд.мм.гггг): ")
         try:
-            age = datetime.strptime(birth_date, "%d.%m.%Y").year
-            save_user_data(name, email, phone, birth_date)
-            return age
+            age = datetime.now().year - datetime.strptime(birth_date, "%d.%m.%Y").year
         except ValueError:
             print("Ошибка в формате даты")
             return None
+        password = input("Введите пароль: ")
+        save_user_data(name, email, phone, birth_date, password)
+        return age
     else:
         print("Некорректный выбор")
         return None
@@ -165,12 +174,12 @@ def agecheck(age):
         }
 
 def order(menu):
-    ingridients_check = {
-        "1": "Пепперони", "2": "Салями", "3": "Ветчина", "4": "Бекон", "5": "Куриное филе",
-        "6": "Моцарелла", "7": "Чеддер", "8": "Горгонзола", "9": "Пармезан", "10": "Фета",
-        "11": "Томатный соус", "12": "Сырный соус", "13": "Барбекю", "14": "Песто", "15": "Сметанный соус",
-        "16": "Шампиньоны", "17": "Лук", "18": "Сладкий перец", "19": "Оливки", "20": "Помидоры"
-    }
+    ingridients_check = [
+        "Пепперони", "Салями", "Ветчина", "Бекон", "Куриное филе",
+        "Моцарелла", "Чеддер", "Горгонзола", "Пармезан", "Фета",
+        "Томатный соус", "Сырный соус", "Барбекю", "Песто", "Сметанный соус",
+        "Шампиньоны", "Лук", "Сладкий перец", "Оливки", "Помидоры"
+    ]
     total = 0
     order_items = []
     ingredients_used = []
@@ -183,14 +192,14 @@ def order(menu):
             if item == "Хочу создать пиццу":
                 print("Вы выбрали создание кастомной пиццы.")
                 print("Список ингредиентов:")
-                for key, value in ingridients_check.items():
-                    print(f"{key}: {value}")
-                ingredients_input = input("Введите номера ингредиентов через запятую: ")
+                for i, value in enumerate(ingridients_check, 1):
+                    print(f"{i}: {value}")
+                ingredients_input = input("Введите номера ингредиентов")
                 ingredients_list = ingredients_input.split(',')
                 try:
-                    ingredients = [ingridients_check[num.strip()] for num in ingredients_list]
+                    ingredients = [ingridients_check[int(num.strip()) - 1] for num in ingredients_list]
                     ingredients_used.extend(ingredients)
-                except KeyError:
+                except (ValueError, IndexError):
                     print("Нужно ввести цифру")
                     return
                 cp_name = f"Кастомная пицца: {', '.join(ingredients)}"
