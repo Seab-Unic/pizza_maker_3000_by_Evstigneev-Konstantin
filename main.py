@@ -26,7 +26,7 @@ async def fun1(x):
     await asyncio.sleep(10)
 
 def check_fio(fio):
-    pattern = r"^[А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+$"
+    pattern = r"^\S+\s+\S+\s+\S+$"
     return bool(re.fullmatch(pattern, fio.strip()))
 
 def check_email(email):
@@ -77,7 +77,7 @@ def login():
         print("Ошибка, некорректный формат email")
         return None
     if not check_user_exists(email):
-        print("Пользователь с таким email не найден")
+        print("Пользователь с таким email не найден,зарегестрируйтесь прежде чем вводить email")
         return None
     password = input("Введите пароль: ")
     if not check_user_exists(email, password):
@@ -85,7 +85,6 @@ def login():
         return None
     print("Вход выполнен успешно")
     return email
-
 def info():
     print("1. Вход")
     print("2. Регистрация")
@@ -105,7 +104,7 @@ def info():
             print("Ошибка при чтении данных пользователя")
             return None
     elif choice == "2":
-        name = input("Введите ФИО: ")
+        name = input("Введите ФИО ")
         if not check_fio(name):
             print("Ошибка, некорректный формат ФИО")
             return None
@@ -194,7 +193,7 @@ def order(menu):
                 print("Список ингредиентов:")
                 for i, value in enumerate(ingridients_check, 1):
                     print(f"{i}: {value}")
-                ingredients_input = input("Введите номера ингредиентов")
+                ingredients_input = input("Введите номера ингредиентов через запятую")
                 ingredients_list = ingredients_input.split(',')
                 try:
                     ingredients = [ingridients_check[int(num.strip()) - 1] for num in ingredients_list]
@@ -258,6 +257,7 @@ async def main():
     order(menu)
 
 asyncio.run(main())
+
 
 
 
